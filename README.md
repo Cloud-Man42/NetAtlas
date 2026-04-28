@@ -61,7 +61,7 @@ cd <repo-root>
 powershell -ExecutionPolicy Bypass -File .\scripts\build-msi.ps1
 ```
 
-The build produces `build\dist\NetAtlas-0.1.0.msi`. The installer packages a local NetAtlas launcher, the built frontend, and an empty `netatlas.db`.
+The build produces `build\dist\NetAtlas-0.2.0.msi`. The installer packages a local NetAtlas launcher, the built frontend, and an empty `netatlas.db`.
 It also installs `Installation Instructions.txt` and offers an exit-screen checkbox to open that file when setup finishes.
 
 ## Unit Tests

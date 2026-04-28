@@ -12,15 +12,19 @@ type GlobeMapProps = {
 type GlobePoint = {
   lat: number;
   lng: number;
-  size: number;
+  pointRadius: number;
+  pointAltitude: number;
   color: string;
   label: string;
+  labelText: string;
+  labelAltitude: number;
 };
 
 type GlobeComponentProps = {
   globeImageUrl?: string;
   bumpImageUrl?: string;
   backgroundColor?: string;
+  animateIn?: boolean;
   pointsData?: GlobePoint[];
   pointLat?: string | ((d: GlobePoint) => number);
   pointLng?: string | ((d: GlobePoint) => number);
@@ -28,6 +32,14 @@ type GlobeComponentProps = {
   pointRadius?: string | ((d: GlobePoint) => number);
   pointColor?: string | ((d: GlobePoint) => string);
   pointLabel?: string | ((d: GlobePoint) => string);
+  labelsData?: GlobePoint[];
+  labelLat?: string | ((d: GlobePoint) => number);
+  labelLng?: string | ((d: GlobePoint) => number);
+  labelText?: string | ((d: GlobePoint) => string);
+  labelAltitude?: string | ((d: GlobePoint) => number);
+  labelColor?: string | ((d: GlobePoint) => string);
+  labelSize?: number | string | ((d: GlobePoint) => number);
+  labelDotRadius?: number | string | ((d: GlobePoint) => number);
   width?: number;
   height?: number;
   onGlobeReady?: () => void;
@@ -61,6 +73,13 @@ function colorForHits(hits: number, maxHits: number) {
   const saturation = 90;
   const lightness = 58 - ratio * 18;
   return `hsl(${hue.toFixed(0)} ${saturation}% ${lightness.toFixed(0)}%)`;
+}
+
+function labelForPoint(item: WanSourcePoint) {
+  if (item.city && item.country) {
+    return `${item.city}, ${item.country}`;
+  }
+  return item.country || item.source_ip;
 }
 
 export function GlobeMap({ items, onError }: GlobeMapProps) {
@@ -121,12 +140,16 @@ export function GlobeMap({ items, onError }: GlobeMapProps) {
       return [] as GlobePoint[];
     }
     const maxHits = Math.max(...items.map((item) => item.event_count));
+    const maxLogHits = Math.max(1, Math.log2(maxHits + 1));
     return items.map((item) => ({
       lat: item.latitude!,
       lng: item.longitude!,
-      size: 0.18 + Math.log2(Math.max(1, item.event_count)) * 0.09,
+      pointRadius: 0.055,
+      pointAltitude: 0.07 + (Math.log2(item.event_count + 1) / maxLogHits) * 0.2,
       color: colorForHits(item.event_count, maxHits),
       label: buildPopupContent(item),
+      labelText: labelForPoint(item),
+      labelAltitude: 0.12 + (Math.log2(item.event_count + 1) / maxLogHits) * 0.23,
     }));
   }, [items]);
 
@@ -149,16 +172,25 @@ export function GlobeMap({ items, onError }: GlobeMapProps) {
         <GlobeAny
           // react-globe.gl forwards refs; cast keeps local typing lightweight.
           ref={globeRef as never}
+          animateIn={false}
           globeImageUrl={EARTH_TEXTURE}
           bumpImageUrl={EARTH_BUMP}
           backgroundColor="rgba(0,0,0,0)"
           pointsData={points}
           pointLat="lat"
           pointLng="lng"
-          pointAltitude={() => 0.11}
-          pointRadius="size"
+          pointAltitude="pointAltitude"
+          pointRadius="pointRadius"
           pointColor="color"
           pointLabel="label"
+          labelsData={points}
+          labelLat="lat"
+          labelLng="lng"
+          labelText="labelText"
+          labelAltitude="labelAltitude"
+          labelColor="color"
+          labelSize={1.1}
+          labelDotRadius={0.3}
           width={size.width || undefined}
           height={size.height || undefined}
           onGlobeReady={handleGlobeReady}
