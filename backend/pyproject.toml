@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "netatlas-backend"
+version = "0.1.0"
+description = "NetAtlas WAN source IP GeoIP backend"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "cryptography>=45.0.0,<46.0.0",
+  "fastapi>=0.115.0,<0.116.0",
+  "pydantic-settings>=2.4.0,<2.6.0",
+  "sqlalchemy>=2.0.35,<2.1.0",
+  "uvicorn[standard]>=0.30.6,<0.31.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.3.3,<8.5.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

@@ -1,0 +1,17 @@
+Metadata-Version: 2.4
+Name: netatlas-backend
+Version: 0.1.0
+Summary: NetAtlas WAN source IP GeoIP backend
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: cryptography<46.0.0,>=45.0.0
+Requires-Dist: fastapi<0.116.0,>=0.115.0
+Requires-Dist: pydantic-settings<2.6.0,>=2.4.0
+Requires-Dist: sqlalchemy<2.1.0,>=2.0.35
+Requires-Dist: uvicorn[standard]<0.31.0,>=0.30.6
+Provides-Extra: dev
+Requires-Dist: pytest<8.5.0,>=8.3.3; extra == "dev"
+
+# NetAtlas Backend
+
+FastAPI backend for collecting WAN source IP syslog hits, enriching them with GeoIP, and serving the NetAtlas API and local dashboard.

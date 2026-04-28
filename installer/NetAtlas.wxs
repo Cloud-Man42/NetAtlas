@@ -1,0 +1,86 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+  <Package
+    Name="NetAtlas"
+    Manufacturer="NetAtlas"
+    Version="0.1.0"
+    UpgradeCode="A994BA4A-5945-4292-B594-48F67D12237E"
+    Scope="perUser"
+  >
+    <MajorUpgrade DowngradeErrorMessage="A newer version of NetAtlas is already installed." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOX" Value="1" />
+    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Open installation instructions" />
+    <Property Id="WixShellExecTarget" Value="[#NetAtlasInstallInstructionsFile]" />
+
+    <CustomAction
+      Id="OpenInstallationInstructions"
+      BinaryRef="Wix4UtilCA_$(sys.BUILDARCHSHORT)"
+      DllEntry="WixShellExec"
+      Impersonate="yes"
+    />
+
+    <UI Id="NetAtlasInstallerUI">
+      <ui:WixUI Id="WixUI_Minimal" />
+      <Publish
+        Dialog="ExitDialog"
+        Control="Finish"
+        Event="DoAction"
+        Value="OpenInstallationInstructions"
+        Condition="WIXUI_EXITDIALOGOPTIONALCHECKBOX = 1 AND NOT Installed"
+      />
+    </UI>
+
+    <StandardDirectory Id="LocalAppDataFolder">
+      <Directory Id="INSTALLFOLDER" Name="NetAtlas">
+        <Directory Id="DATAFOLDER" Name="Data" />
+      </Directory>
+    </StandardDirectory>
+
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="NETATLASPROGRAMMENU" Name="NetAtlas" />
+    </StandardDirectory>
+
+    <Feature Id="NetAtlasFeature" Title="NetAtlas" Level="1">
+      <ComponentGroupRef Id="NetAtlasApplicationFiles" />
+      <ComponentRef Id="NetAtlasInstallationInstructions" />
+      <ComponentRef Id="NetAtlasProgramMenuShortcut" />
+      <ComponentRef Id="NetAtlasEmptyDatabase" />
+    </Feature>
+
+    <ComponentGroup Id="NetAtlasApplicationFiles" Directory="INSTALLFOLDER">
+      <Files Include="!(bindpath.app)\**" />
+    </ComponentGroup>
+
+    <DirectoryRef Id="INSTALLFOLDER">
+      <Component Id="NetAtlasInstallationInstructions" Guid="AE23D3D4-EA56-43C1-839B-E471DEFEF19A">
+        <File
+          Id="NetAtlasInstallInstructionsFile"
+          Source="!(bindpath.installer)\Installation Instructions.txt"
+          Name="Installation Instructions.txt"
+          KeyPath="yes"
+        />
+      </Component>
+    </DirectoryRef>
+
+    <DirectoryRef Id="NETATLASPROGRAMMENU">
+      <Component Id="NetAtlasProgramMenuShortcut" Guid="7F17160A-CB91-4D61-8DEA-91C0B83C5AA9">
+        <Shortcut
+          Id="NetAtlasShortcut"
+          Name="NetAtlas"
+          Description="Launch NetAtlas"
+          Target="[INSTALLFOLDER]NetAtlas.exe"
+          WorkingDirectory="INSTALLFOLDER"
+        />
+        <RemoveFolder Id="RemoveNetAtlasProgramMenuFolder" On="uninstall" />
+        <RegistryValue Root="HKCU" Key="Software\NetAtlas" Name="Installed" Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+
+    <DirectoryRef Id="DATAFOLDER">
+      <Component Id="NetAtlasEmptyDatabase" Guid="65EA7A72-5238-433D-9D03-E20D8406B80F">
+        <File Id="NetAtlasDatabaseFile" Source="!(bindpath.db)\netatlas.db" Name="netatlas.db" KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+  </Package>
+</Wix>

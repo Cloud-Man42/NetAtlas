@@ -1,0 +1,17 @@
+.venv/
+backend/.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+backend/.env
+backend/storage/
+frontend/.env
+frontend/node_modules/
+frontend/dist/
+backend/build/
+backend/dist/
+build/
+.cursor/
+.wix/

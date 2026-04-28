@@ -1,0 +1,64 @@
+NetAtlas Installation Instructions
+=================================
+
+Thank you for installing NetAtlas.
+
+Installed location
+------------------
+- NetAtlas installs to your local application data folder.
+- The default application folder is:
+  %LOCALAPPDATA%\NetAtlas
+
+How to start NetAtlas
+---------------------
+1. Open the Start menu.
+2. Select NetAtlas.
+3. NetAtlas starts the local web server and opens the application in your browser.
+
+HTTPS
+-----
+- NetAtlas uses local HTTPS by default at:
+  https://localhost:8443
+- On first run, NetAtlas creates a self-signed local certificate.
+- Your browser may show a certificate warning until that local certificate is trusted.
+
+Data files
+----------
+- The SQLite database is created as:
+  %LOCALAPPDATA%\NetAtlas\Data\netatlas.db
+- Local TLS files are stored in:
+  %LOCALAPPDATA%\NetAtlas\Data\tls
+
+Configuration
+-------------
+- NetAtlas uses environment-based configuration.
+- Configuration is read from:
+  %LOCALAPPDATA%\NetAtlas\.env
+- If `.env` does not exist yet, create it and add one `KEY=value` per line.
+
+Common configuration keys:
+- `HTTPS_ENABLED` (default: `true`)
+- `HTTPS_PORT` (default: `8443`)
+- `HTTPS_CERT_FILE` and `HTTPS_KEY_FILE` (optional custom TLS certificate paths)
+- `SYSLOG_ENABLED` (default: `true`)
+- `SYSLOG_BIND_HOST` (default: `0.0.0.0`)
+- `SYSLOG_BIND_PORT` (default: `5140`)
+- `WAN_INTERFACE_KEYWORDS` (default: `wan,internet,pppoe`)
+- `GEOIP_LOOKUP_ENABLED` (default: `true`)
+- `GEOIP_LOOKUP_URL` (default: `https://ipwho.is/{ip}`)
+- `GEOIP_LOOKUP_TIMEOUT_SECONDS` (default: `3.0`)
+- `CORS_ORIGINS` (default local HTTPS origins)
+
+Applying configuration changes:
+1. Close NetAtlas.
+2. Edit and save `%LOCALAPPDATA%\NetAtlas\.env`.
+3. Start NetAtlas again.
+
+Troubleshooting
+---------------
+- If the browser does not open automatically, browse to:
+  https://localhost:8443
+- If NetAtlas is already running, close the existing instance and start it again.
+- If you need to remove local data, uninstall NetAtlas and review the files under:
+  %LOCALAPPDATA%\NetAtlas
+
