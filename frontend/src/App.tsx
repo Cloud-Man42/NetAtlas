@@ -1,13 +1,18 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import { getWanSources, type TimeRange } from "./api";
-import { buildPopupContent, formatCountryName, formatLocation } from "./app-formatting";
+import { formatCountryName, formatLocation } from "./app-formatting";
+import { FlatMap } from "./components/FlatMap";
+import { GlobeMap } from "./components/GlobeMap";
 
 const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 const TIME_RANGES: TimeRange[] = ["1h", "24h", "7d", "30d"];
 const NETATLAS_LOGO_PATH = "/assets/netatlas logo.png";
 const SPLASH_MINIMUM_MS = 1400;
+const MAP_VIEWS = ["flat", "globe"] as const;
+
+type MapView = (typeof MAP_VIEWS)[number];
 
 type BrandMarkProps = {
   className?: string;
@@ -36,7 +41,7 @@ export function App() {
   const [timeRange, setTimeRange] = useState<TimeRange>("24h");
   const [mapError, setMapError] = useState<string | null>(null);
   const [showSplash, setShowSplash] = useState(true);
-  const mapRef = useRef<HTMLDivElement | null>(null);
+  const [mapView, setMapView] = useState<MapView>("flat");
 
   const query = useQuery({
     queryKey: ["wan-sources", timeRange],
@@ -53,76 +58,6 @@ export function App() {
     () => (query.data?.items ?? []).filter((item) => item.latitude !== null && item.longitude !== null),
     [query.data],
   );
-
-  useEffect(() => {
-    const container = mapRef.current;
-    if (!container || mappableItems.length === 0) {
-      return;
-    }
-
-    let cancelled = false;
-    let cleanupMap: (() => void) | undefined;
-    setMapError(null);
-
-    void import("leaflet")
-      .then((L) => {
-        if (cancelled || !container) {
-          return;
-        }
-
-        const center: [number, number] = [mappableItems[0].latitude!, mappableItems[0].longitude!];
-        const map = L.map(container, {
-          zoomControl: true,
-          attributionControl: true,
-        });
-
-        cleanupMap = () => {
-          map.remove();
-        };
-
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-          maxZoom: 19,
-        }).addTo(map);
-
-        const bounds = L.latLngBounds(
-          mappableItems.map((item) => [item.latitude!, item.longitude!] as [number, number]),
-        );
-
-        mappableItems.forEach((item) => {
-          const marker = L.circleMarker([item.latitude!, item.longitude!], {
-            radius: Math.min(18, Math.max(6, 6 + Math.log2(Math.max(1, item.event_count)) * 2)),
-            color: "#2563eb",
-            fillColor: "#60a5fa",
-            fillOpacity: 0.8,
-            weight: 2,
-          });
-          marker.addTo(map);
-          marker.bindPopup(buildPopupContent(item));
-          marker.bindTooltip(`${item.event_count} hits`, { direction: "top" });
-        });
-
-        if (mappableItems.length > 1) {
-          map.fitBounds(bounds, { padding: [24, 24] });
-        } else {
-          map.setView(center, 4);
-        }
-
-        requestAnimationFrame(() => {
-          map.invalidateSize();
-        });
-      })
-      .catch((error: unknown) => {
-        if (!cancelled) {
-          setMapError(error instanceof Error ? error.message : "Leaflet failed to load");
-        }
-      });
-
-    return () => {
-      cancelled = true;
-      cleanupMap?.();
-    };
-  }, [mappableItems]);
 
   return (
     <div className="app-shell">
@@ -175,6 +110,20 @@ export function App() {
         <div className="card map-card">
           <div className="card-header">
             <h2>Map</h2>
+            <div className="map-view-toggle" role="tablist" aria-label="Map view">
+              {MAP_VIEWS.map((view) => (
+                <button
+                  key={view}
+                  type="button"
+                  role="tab"
+                  aria-selected={mapView === view}
+                  className={`map-view-toggle__button${mapView === view ? " map-view-toggle__button--active" : ""}`}
+                  onClick={() => setMapView(view)}
+                >
+                  {view === "flat" ? "Flat map" : "Globe"}
+                </button>
+              ))}
+            </div>
           </div>
           {query.isLoading ? (
             <div className="empty-state">Loading map data...</div>
@@ -182,8 +131,10 @@ export function App() {
             <div className="empty-state">{mapError}</div>
           ) : mappableItems.length === 0 ? (
             <div className="empty-state">No mappable WAN source IPs are available for this time range.</div>
+          ) : mapView === "flat" ? (
+            <FlatMap items={mappableItems} onError={setMapError} />
           ) : (
-            <div ref={mapRef} className="map-canvas" />
+            <GlobeMap items={mappableItems} onError={setMapError} />
           )}
         </div>
 

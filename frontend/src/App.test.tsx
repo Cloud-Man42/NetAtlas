@@ -14,6 +14,34 @@ vi.mock("./api", async () => {
   };
 });
 
+vi.mock("./components/FlatMap", () => ({
+  FlatMap: () => <div data-testid="flat-map-mock">Flat map mock</div>,
+}));
+
+vi.mock("./components/GlobeMap", () => ({
+  GlobeMap: () => <div data-testid="globe-map-mock">Globe map mock</div>,
+}));
+
+const dataWithMappablePoint = {
+  time_range: "24h" as const,
+  total_hits: 1,
+  items: [
+    {
+      source_ip: "8.8.8.8",
+      country: "United States",
+      country_code: "US",
+      region: "California",
+      city: "Mountain View",
+      latitude: 37.386,
+      longitude: -122.084,
+      event_count: 1,
+      last_seen_at: null,
+      last_message: "test",
+    },
+  ],
+  countries: [{ country: "United States", country_code: "US", count: 1 }],
+};
+
 describe("App", () => {
   beforeEach(() => {
     mockGetWanSources.mockReset();
@@ -65,5 +93,19 @@ describe("App", () => {
     await waitFor(() => {
       expect(mockGetWanSources).toHaveBeenCalledWith("7d");
     });
+  });
+
+  it("toggles between flat map and globe map views", async () => {
+    mockGetWanSources.mockResolvedValue(dataWithMappablePoint);
+
+    renderWithQueryClient(<App />);
+
+    expect(await screen.findByTestId("flat-map-mock")).toBeInTheDocument();
+    expect(screen.queryByTestId("globe-map-mock")).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("tab", { name: "Globe" }));
+
+    expect(await screen.findByTestId("globe-map-mock")).toBeInTheDocument();
+    expect(screen.queryByTestId("flat-map-mock")).not.toBeInTheDocument();
   });
 });
