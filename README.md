@@ -19,7 +19,7 @@ This project:
 ## Backend Setup
 
 ```powershell
-cd C:\Users\hm\ip-source-map\backend
+cd .\backend
 py -3 -m venv .venv
 .\.venv\Scripts\python -m pip install --upgrade pip
 .\.venv\Scripts\python -m pip install -e ".[dev]"
@@ -29,7 +29,7 @@ Copy-Item .env.example .env
 ## Frontend Setup
 
 ```powershell
-cd C:\Users\hm\ip-source-map\frontend
+cd .\frontend
 npm install
 Copy-Item .env.example .env
 ```
@@ -39,14 +39,14 @@ Copy-Item .env.example .env
 Backend:
 
 ```powershell
-cd C:\Users\hm\ip-source-map\backend
+cd .\backend
 .\.venv\Scripts\python -m app.launcher
 ```
 
 Frontend:
 
 ```powershell
-cd C:\Users\hm\ip-source-map\frontend
+cd .\frontend
 npm run dev
 ```
 
@@ -57,7 +57,7 @@ On first run, NetAtlas creates a self-signed certificate in `backend\storage\tls
 ## Build The MSI
 
 ```powershell
-cd C:\Users\hm\ip-source-map
+cd <repo-root>
 powershell -ExecutionPolicy Bypass -File .\scripts\build-msi.ps1
 ```
 
@@ -69,14 +69,14 @@ It also installs `Installation Instructions.txt` and offers an exit-screen check
 Run frontend unit tests:
 
 ```powershell
-cd C:\Users\hm\ip-source-map\frontend
+cd .\frontend
 npm test
 ```
 
 Run backend unit tests:
 
 ```powershell
-cd C:\Users\hm\ip-source-map\backend
+cd .\backend
 .\.venv\Scripts\python -m pytest
 ```
 
