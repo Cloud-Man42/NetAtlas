@@ -11,6 +11,7 @@ from pathlib import Path
 import uvicorn
 
 from app.core.config import Settings
+from app.runtime_env import ensure_runtime_env_file
 from app.tls import ensure_local_tls_certificates
 
 APP_HOST = "127.0.0.1"
@@ -101,6 +102,7 @@ def main() -> None:
     frontend_dir = _frontend_dir(runtime_root)
     data_dir = _data_dir(runtime_root)
     data_dir.mkdir(parents=True, exist_ok=True)
+    ensure_runtime_env_file(runtime_root)
     log_path = data_dir / "netatlas.log"
 
     os.environ.setdefault("NETATLAS_STATIC_DIR", str(frontend_dir))

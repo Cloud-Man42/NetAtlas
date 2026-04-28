@@ -8,6 +8,7 @@ app/main.py
 app/models.py
 app/parser.py
 app/receiver.py
+app/runtime_env.py
 app/schemas.py
 app/tls.py
 app/core/config.py
@@ -21,4 +22,5 @@ tests/test_geoip.py
 tests/test_ingestion.py
 tests/test_ingestion_unit.py
 tests/test_parser.py
+tests/test_runtime_env.py
 tests/test_tls.py

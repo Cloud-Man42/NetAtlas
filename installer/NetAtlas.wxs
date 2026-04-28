@@ -44,6 +44,7 @@
     <Feature Id="NetAtlasFeature" Title="NetAtlas" Level="1">
       <ComponentGroupRef Id="NetAtlasApplicationFiles" />
       <ComponentRef Id="NetAtlasInstallationInstructions" />
+      <ComponentRef Id="NetAtlasEnvFile" />
       <ComponentRef Id="NetAtlasProgramMenuShortcut" />
       <ComponentRef Id="NetAtlasEmptyDatabase" />
     </Feature>
@@ -58,6 +59,14 @@
           Id="NetAtlasInstallInstructionsFile"
           Source="!(bindpath.installer)\Installation Instructions.txt"
           Name="Installation Instructions.txt"
+          KeyPath="yes"
+        />
+      </Component>
+      <Component Id="NetAtlasEnvFile" Guid="18FCB397-E2FE-4C4E-905B-BE01B30180F2" NeverOverwrite="yes">
+        <File
+          Id="NetAtlasEnvTemplateFile"
+          Source="!(bindpath.installer)\NetAtlas.env"
+          Name=".env"
           KeyPath="yes"
         />
       </Component>

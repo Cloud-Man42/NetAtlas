@@ -34,7 +34,8 @@ Configuration
 - NetAtlas uses environment-based configuration.
 - Configuration is read from:
   %LOCALAPPDATA%\NetAtlas\.env
-- If `.env` does not exist yet, create it and add one `KEY=value` per line.
+- NetAtlas creates `.env` during installation with the default settings.
+- Edit the existing file and keep one `KEY=value` pair per line.
 
 Common configuration keys:
 - `HTTPS_ENABLED` (default: `true`)
