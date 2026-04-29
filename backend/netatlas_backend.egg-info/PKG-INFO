@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: netatlas-backend
-Version: 0.2.1
+Version: 0.2.2
 Summary: NetAtlas WAN source IP GeoIP backend
 Requires-Python: >=3.10
 Description-Content-Type: text/markdown

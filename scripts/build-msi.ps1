@@ -22,7 +22,7 @@ $venvPython = Join-Path $venvRoot "Scripts\python.exe"
 $logoSource = Join-Path $frontendRoot "assets\netatlas logo.png"
 $logoTargetDir = Join-Path $frontendRoot "dist\assets"
 $emptyDatabase = Join-Path $installerDataRoot "netatlas.db"
-$msiPath = Join-Path $outputRoot "NetAtlas-0.2.1.msi"
+$msiPath = Join-Path $outputRoot "NetAtlas-0.2.2.msi"
 
 New-Item -ItemType Directory -Force -Path $buildRoot, $outputRoot, $installerDataRoot | Out-Null
 

@@ -62,6 +62,15 @@ def _tls_hosts(bind_host: str) -> list[str]:
     return hosts
 
 
+def _settings_with_launcher_defaults() -> Settings:
+    settings = Settings()
+    if "HTTPS_ENABLED" not in os.environ:
+        settings.https_enabled = True
+    if "HTTPS_PORT" not in os.environ:
+        settings.https_port = HTTPS_PORT
+    return settings
+
+
 def _open_browser_when_ready(url: str, host: str, port: int) -> None:
     def _open() -> None:
         _wait_for_server(host, port)
@@ -118,11 +127,8 @@ def main() -> None:
 
     os.environ.setdefault("NETATLAS_STATIC_DIR", str(frontend_dir))
     os.environ.setdefault("NETATLAS_DATA_DIR", str(data_dir))
-    os.environ.setdefault("HTTPS_ENABLED", "true")
-    os.environ.setdefault("HTTPS_PORT", str(HTTPS_PORT))
-    os.environ.setdefault("APP_BIND_HOST", DEFAULT_APP_BIND_HOST)
 
-    settings = Settings()
+    settings = _settings_with_launcher_defaults()
     app_scheme = "https" if settings.https_enabled else "http"
     app_port = settings.https_port if settings.https_enabled else HTTP_PORT
     browser_host = _browser_host_for_bind_host(settings.app_bind_host)
