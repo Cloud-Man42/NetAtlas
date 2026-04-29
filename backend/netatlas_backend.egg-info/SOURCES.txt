@@ -18,9 +18,11 @@ netatlas_backend.egg-info/SOURCES.txt
 netatlas_backend.egg-info/dependency_links.txt
 netatlas_backend.egg-info/requires.txt
 netatlas_backend.egg-info/top_level.txt
+tests/test_config.py
 tests/test_geoip.py
 tests/test_ingestion.py
 tests/test_ingestion_unit.py
+tests/test_launcher.py
 tests/test_parser.py
 tests/test_runtime_env.py
 tests/test_tls.py

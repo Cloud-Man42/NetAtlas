@@ -2,7 +2,7 @@
   <Package
     Name="NetAtlas"
     Manufacturer="NetAtlas"
-    Version="0.2.0"
+    Version="0.2.1"
     UpgradeCode="A994BA4A-5945-4292-B594-48F67D12237E"
     Scope="perUser"
   >

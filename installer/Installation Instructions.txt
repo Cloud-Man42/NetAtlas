@@ -36,29 +36,149 @@ Configuration
   %LOCALAPPDATA%\NetAtlas\.env
 - NetAtlas creates `.env` during installation with the default settings.
 - Edit the existing file and keep one `KEY=value` pair per line.
+- Restart NetAtlas after changing `.env`.
 
-Common configuration keys:
-- `HTTPS_ENABLED` (default: `true`)
-- `HTTPS_PORT` (default: `8443`)
-- `HTTPS_CERT_FILE` and `HTTPS_KEY_FILE` (optional custom TLS certificate paths)
-- `SYSLOG_ENABLED` (default: `true`)
-- `SYSLOG_BIND_HOST` (default: `0.0.0.0`)
-- `SYSLOG_BIND_PORT` (default: `5140`)
-- `WAN_INTERFACE_KEYWORDS` (default: `wan,internet,pppoe`)
-- `GEOIP_LOOKUP_ENABLED` (default: `true`)
-- `GEOIP_LOOKUP_URL` (default: `https://ipwho.is/{ip}`)
-- `GEOIP_LOOKUP_TIMEOUT_SECONDS` (default: `3.0`)
-- `CORS_ORIGINS` (default local HTTPS origins)
+Default installed .env:
+  API_PREFIX=/api
+  HTTPS_ENABLED=true
+  HTTPS_PORT=8443
+  HTTPS_CERT_FILE=
+  HTTPS_KEY_FILE=
+  APP_BIND_HOST=127.0.0.1
+  SYSLOG_ENABLED=true
+  SYSLOG_BIND_HOST=0.0.0.0
+  SYSLOG_BIND_PORT=5140
+  SYSLOG_MAX_MESSAGE_SIZE=65535
+  WAN_INTERFACE_KEYWORDS=wan,internet,pppoe
+  GEOIP_LOOKUP_ENABLED=true
+  GEOIP_LOOKUP_URL=https://ipwho.is/{ip}
+  GEOIP_LOOKUP_TIMEOUT_SECONDS=3.0
+
+Complete configuration reference:
+
+- `API_PREFIX`
+  Default: `/api`
+  Purpose: Reserved API prefix setting. The packaged NetAtlas API is served under `/api`.
+  Recommended: Leave as `/api`.
+
+- `DATABASE_URL`
+  Default: SQLite database under `%LOCALAPPDATA%\NetAtlas\Data\netatlas.db`.
+  Purpose: Overrides the database connection string.
+  Example: `DATABASE_URL=sqlite:///C:/NetAtlas/Data/netatlas.db`
+  Recommended: Leave unset unless you intentionally move the database.
+
+- `HTTPS_ENABLED`
+  Default: `true`
+  Purpose: Enables HTTPS for the local web server.
+  Values: `true` or `false`
+  Notes: The packaged launcher defaults to HTTPS. If set to `false`, NetAtlas uses HTTP on internal port `8000`.
+
+- `HTTPS_PORT`
+  Default: `8443`
+  Purpose: HTTPS web server port.
+  Example: `HTTPS_PORT=9443`
+  Notes: If you change this port, update firewall rules and browse to the new port.
+
+- `HTTPS_CERT_FILE`
+  Default: empty
+  Purpose: Optional full path to a custom TLS certificate file.
+  Example: `HTTPS_CERT_FILE=C:/Certificates/netatlas.crt`
+  Notes: Use with `HTTPS_KEY_FILE`. If both are empty, NetAtlas creates a self-signed local certificate.
+
+- `HTTPS_KEY_FILE`
+  Default: empty
+  Purpose: Optional full path to the private key for `HTTPS_CERT_FILE`.
+  Example: `HTTPS_KEY_FILE=C:/Certificates/netatlas.key`
+  Notes: Use a certificate/key pair that matches the hostname or IP address users browse to.
+
+- `APP_BIND_HOST`
+  Default: `127.0.0.1`
+  Purpose: Controls which network interface the web UI/API binds to.
+  Values:
+    `127.0.0.1` - local computer only.
+    `0.0.0.0` - all IPv4 interfaces; use this to publish NetAtlas on your LAN.
+    Specific IP - bind only to that local server IP, for example `192.168.1.25`.
+  Security note: Keep `127.0.0.1` unless you intentionally want network access.
+
+- `SYSLOG_ENABLED`
+  Default: `true`
+  Purpose: Enables the UDP syslog receiver.
+  Values: `true` or `false`
+
+- `SYSLOG_BIND_HOST`
+  Default: `0.0.0.0`
+  Purpose: Controls which interface the UDP syslog receiver listens on.
+  Values:
+    `0.0.0.0` - listen on all IPv4 interfaces.
+    Specific IP - listen only on that local server IP.
+  Notes: This is separate from `APP_BIND_HOST`.
+
+- `SYSLOG_BIND_PORT`
+  Default: `5140`
+  Purpose: UDP port for incoming Zyxel syslog messages.
+  Example: `SYSLOG_BIND_PORT=514`
+  Notes: Ports below 1024 can require elevated privileges. Make sure Windows Firewall allows inbound UDP traffic to this port.
+
+- `SYSLOG_MAX_MESSAGE_SIZE`
+  Default: `65535`
+  Purpose: Maximum UDP syslog packet size accepted by NetAtlas.
+  Recommended: Leave at `65535` unless troubleshooting unusual device output.
+
+- `WAN_INTERFACE_KEYWORDS`
+  Default: `wan,internet,pppoe`
+  Purpose: Comma-separated keywords used to identify inbound WAN activity from parsed syslog messages.
+  Example: `WAN_INTERFACE_KEYWORDS=wan,pppoe1,outside`
+  Notes: Keywords are matched case-insensitively after trimming spaces.
+
+- `GEOIP_LOOKUP_ENABLED`
+  Default: `true`
+  Purpose: Enables country/region/city/coordinate lookup for public source IPs.
+  Values: `true` or `false`
+  Notes: Private and invalid IPs are skipped.
+
+- `GEOIP_LOOKUP_URL`
+  Default: `https://ipwho.is/{ip}`
+  Purpose: GeoIP lookup endpoint. `{ip}` is replaced with the source IP.
+  Example: `GEOIP_LOOKUP_URL=https://ipwho.is/{ip}`
+  Required response fields: NetAtlas expects JSON containing at least `country`; optional fields include `country_code`, `region`, `city`, `latitude`, and `longitude`.
+
+- `GEOIP_LOOKUP_TIMEOUT_SECONDS`
+  Default: `3.0`
+  Purpose: Timeout for each GeoIP HTTP lookup.
+  Example: `GEOIP_LOOKUP_TIMEOUT_SECONDS=5.0`
+  Notes: A failed or timed-out lookup stores the hit without location data.
+
+- `CORS_ORIGINS`
+  Default: local HTTPS origins generated by the launcher.
+  Purpose: Comma-separated browser origins allowed to call the API.
+  Example: `CORS_ORIGINS=https://localhost:8443,https://192.168.1.25:8443`
+  Notes: Usually not needed for the packaged app because the frontend and API are served from the same origin. Set this only when serving the frontend separately or from another host.
 
 Applying configuration changes:
 1. Close NetAtlas.
 2. Edit and save `%LOCALAPPDATA%\NetAtlas\.env`.
 3. Start NetAtlas again.
 
+Publishing the web UI on your network:
+1. Set `APP_BIND_HOST=0.0.0.0`.
+2. Restart NetAtlas.
+3. Allow inbound TCP traffic to the HTTPS port in Windows Firewall, default `8443`.
+4. Browse from another computer to `https://<server-ip>:8443`.
+5. If the frontend is served from a separate host, add that host to `CORS_ORIGINS`.
+
+When using the default self-signed local certificate from another computer, the browser may show a certificate warning.
+For trusted network access, configure `HTTPS_CERT_FILE` and `HTTPS_KEY_FILE` with a certificate that matches the hostname or IP address you use.
+
+Firewall summary:
+- Web UI/API: inbound TCP `HTTPS_PORT`, default `8443`, only needed for network access.
+- Syslog receiver: inbound UDP `SYSLOG_BIND_PORT`, default `5140`, needed for Zyxel/syslog devices to send logs.
+
 Troubleshooting
 ---------------
 - If the browser does not open automatically, browse to:
   https://localhost:8443
+- If another computer cannot reach NetAtlas, check `APP_BIND_HOST`, Windows Firewall, and that you are browsing to the server IP and correct port.
+- If the map shows `Unknown` locations, confirm `GEOIP_LOOKUP_ENABLED=true` and that the server can reach `https://ipwho.is/`.
 - If NetAtlas is already running, close the existing instance and start it again.
 - If you need to remove local data, uninstall NetAtlas and review the files under:
   %LOCALAPPDATA%\NetAtlas

@@ -14,7 +14,7 @@ from app.core.config import Settings
 from app.runtime_env import ensure_runtime_env_file
 from app.tls import ensure_local_tls_certificates
 
-APP_HOST = "127.0.0.1"
+DEFAULT_APP_BIND_HOST = "127.0.0.1"
 HTTP_PORT = 8000
 HTTPS_PORT = 8443
 
@@ -51,9 +51,20 @@ def _wait_for_server(host: str, port: int, attempts: int = 40, delay_seconds: fl
             time.sleep(delay_seconds)
 
 
-def _open_browser_when_ready(url: str, port: int) -> None:
+def _browser_host_for_bind_host(bind_host: str) -> str:
+    return "localhost" if bind_host in {"0.0.0.0", "::"} else bind_host
+
+
+def _tls_hosts(bind_host: str) -> list[str]:
+    hosts = [DEFAULT_APP_BIND_HOST, "localhost"]
+    if bind_host not in {"0.0.0.0", "::"} and bind_host not in hosts:
+        hosts.append(bind_host)
+    return hosts
+
+
+def _open_browser_when_ready(url: str, host: str, port: int) -> None:
     def _open() -> None:
-        _wait_for_server(APP_HOST, port)
+        _wait_for_server(host, port)
         webbrowser.open(url)
 
     threading.Thread(target=_open, name="netatlas-browser-launcher", daemon=True).start()
@@ -67,7 +78,7 @@ def _resolve_tls_files(settings: Settings, data_dir: Path) -> tuple[Path, Path]:
             raise FileNotFoundError("Configured HTTPS certificate or key file was not found.")
         return cert_path, key_path
 
-    return ensure_local_tls_certificates(data_dir, hosts=[APP_HOST, "localhost"])
+    return ensure_local_tls_certificates(data_dir, hosts=_tls_hosts(settings.app_bind_host))
 
 
 def _uvicorn_log_config(log_path: Path) -> dict[str, object]:
@@ -109,11 +120,16 @@ def main() -> None:
     os.environ.setdefault("NETATLAS_DATA_DIR", str(data_dir))
     os.environ.setdefault("HTTPS_ENABLED", "true")
     os.environ.setdefault("HTTPS_PORT", str(HTTPS_PORT))
+    os.environ.setdefault("APP_BIND_HOST", DEFAULT_APP_BIND_HOST)
 
     settings = Settings()
     app_scheme = "https" if settings.https_enabled else "http"
     app_port = settings.https_port if settings.https_enabled else HTTP_PORT
-    os.environ.setdefault("CORS_ORIGINS", f"{app_scheme}://{APP_HOST}:{app_port},{app_scheme}://localhost:{app_port}")
+    browser_host = _browser_host_for_bind_host(settings.app_bind_host)
+    os.environ.setdefault(
+        "CORS_ORIGINS",
+        f"{app_scheme}://{DEFAULT_APP_BIND_HOST}:{app_port},{app_scheme}://localhost:{app_port}",
+    )
 
     ssl_options: dict[str, str] = {}
     if settings.https_enabled:
@@ -123,10 +139,10 @@ def main() -> None:
             "ssl_keyfile": str(key_path),
         }
 
-    _open_browser_when_ready(f"{app_scheme}://localhost:{app_port}", app_port)
+    _open_browser_when_ready(f"{app_scheme}://{browser_host}:{app_port}", browser_host, app_port)
     uvicorn.run(
         "app.main:app",
-        host=APP_HOST,
+        host=settings.app_bind_host,
         port=app_port,
         reload=False,
         workers=1,

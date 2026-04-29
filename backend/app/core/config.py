@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     https_port: int = Field(default=8443, alias="HTTPS_PORT")
     https_cert_file: str | None = Field(default=None, alias="HTTPS_CERT_FILE")
     https_key_file: str | None = Field(default=None, alias="HTTPS_KEY_FILE")
+    app_bind_host: str = Field(default="127.0.0.1", alias="APP_BIND_HOST")
     syslog_enabled: bool = Field(default=True, alias="SYSLOG_ENABLED")
     syslog_bind_host: str = Field(default="0.0.0.0", alias="SYSLOG_BIND_HOST")
     syslog_bind_port: int = Field(default=5140, alias="SYSLOG_BIND_PORT")

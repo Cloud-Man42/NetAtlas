@@ -6,6 +6,7 @@ def test_build_runtime_env_contents_uses_install_safe_defaults() -> None:
 
     assert "GEOIP_LOOKUP_ENABLED=true\n" in contents
     assert "GEOIP_LOOKUP_URL=https://ipwho.is/{ip}\n" in contents
+    assert "APP_BIND_HOST=127.0.0.1\n" in contents
     assert "WAN_INTERFACE_KEYWORDS=wan,internet,pppoe\n" in contents
     assert "DATABASE_URL=" not in contents
     assert contents.endswith("\n")

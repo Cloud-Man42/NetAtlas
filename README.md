@@ -54,6 +54,8 @@ The local launcher starts NetAtlas over `https://localhost:8443`.
 
 On first run, NetAtlas creates a self-signed certificate in `backend\storage\tls` for local HTTPS. Your browser may show a local certificate warning until that certificate is trusted on your machine.
 
+To publish the web UI on your LAN, set `APP_BIND_HOST=0.0.0.0` in the backend or installed `.env`, restart NetAtlas, and allow inbound TCP traffic to the HTTPS port. Remote users can then browse to `https://<server-ip>:8443`.
+
 ## Build The MSI
 
 ```powershell
@@ -61,7 +63,7 @@ cd <repo-root>
 powershell -ExecutionPolicy Bypass -File .\scripts\build-msi.ps1
 ```
 
-The build produces `build\dist\NetAtlas-0.2.0.msi`. The installer packages a local NetAtlas launcher, the built frontend, and an empty `netatlas.db`.
+The build produces `build\dist\NetAtlas-0.2.1.msi`. The installer packages a local NetAtlas launcher, the built frontend, and an empty `netatlas.db`.
 It also installs `Installation Instructions.txt` and offers an exit-screen checkbox to open that file when setup finishes.
 
 ## Unit Tests
